@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Paciente {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updateAt  DateTime   @updatedAt
+  nome      String
+  idade     Int
+  genero    String
+  morada    String?
+  contacto  Int
+  deleted   Boolean    @default(false)
+  consulta  Consulta[]
+}
+
+model Medico {
+  id            String     @id @default(uuid())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  nomeMedico    String
+  especialidade String
+  deleted       Boolean    @default(false)
+  consulta      Consulta[]
+}
+
+model Consulta {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  data       DateTime
+  hora       DateTime
+  sala       String   @db.Text()
+  obs        String?  @db.Text()
+  deleted    Boolean  @default(false)
+  pacienteId String
+  paciente   Paciente @relation(fields: [pacienteId], references: [id])
+  medicoId   String
+  medico     Medico   @relation(fields: [medicoId], references: [id])
+}
+
+// -----Autenticação para marcar consulta e verificar os dados --------------------
+
+model User {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  email     String   @unique
+  password  String
+  deleted   Boolean  @default(false)
+  profile   Profile?
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  firstName String
+  lastName  String?
+  bio       String?
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
